@@ -91,10 +91,10 @@ XMing.GameStateManager = new function() {
                     self.checkResult();
                 }
                 else {
-                    var $this = $(this);
                     if (selectedNumber != "") {
-                        $(this).addClass("animated shake", function() {
-                            $this.removeClass("animated shake");
+                        $(this).addClass("animated shake");
+                        $(this).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                            $(this).removeClass("animated shake answer-wrong");
                         });
                     }
                 }
@@ -143,7 +143,7 @@ XMing.GameStateManager = new function() {
         _.delay(function() {
             $("#result").hide();
 
-            if (roundNumber < 16) {
+            if (roundNumber < numerals.length) {
                 self.loadData();
             } else {
                 self.endGame();
@@ -174,9 +174,15 @@ XMing.GameStateManager = new function() {
         }
     };
 
+    this.preloadImage = function() {
+        var imgLove = new Image();
+        imgLove.src = "images/love.png";
+    };
+
     // game status operation
     this.initGame = function() {
         gameState = GAME_STATE_ENUM.INITIAL;
+        this.preloadImage();
 
         var self = this;
         $(".icon-repeat").click(function() {
@@ -216,12 +222,21 @@ XMing.GameStateManager = new function() {
 
         $(".game-grid").html("");
 
-        var letters = ["G", "A", "M", "E", "O", "V", "E", "R", "L"];
-        _.times(7, function() {
-            letters.push("#");
+        var endNumerals = _.first(numerals, 8);
+        var shuffleEndNumerals = _.shuffle(endNumerals);
+
+        var gameover = ["G", "A", "M", "E", "O", "V", "E", "R"];
+
+        _.each(_.first(shuffleEndNumerals, 4), function(endNumeral) {
+            $(".game-grid").append("<li><div class='content animated fadeIn'>" + endNumeral + "</li>");
         });
-        _.each(_.shuffle(letters), function(letter) {
+
+        _.each(gameover, function(letter) {
             $(".game-grid").append("<li><div class='content animated fadeIn'>" + letter + "</li>");
+        });
+
+        _.each(_.last(shuffleEndNumerals, 4), function(endNumeral) {
+            $(".game-grid").append("<li><div class='content animated fadeIn'>" + endNumeral + "</li>");
         });
 
         $("#timer").hide();
@@ -232,6 +247,33 @@ XMing.GameStateManager = new function() {
             title: "Congratulations!",
             text: "Your score is " + score + "! :D",
             imageUrl: "images/word-grid.png"
+        });
+
+        selectedNumbers = [];
+        $("ul.game-grid li").click(function() {
+
+            if (!$(this).hasClass("selected")) {
+                var selectedNumber = $(this.firstChild).html();
+                if (selectedNumber == endNumerals[selectedNumbers.length]) {
+                    $(this).addClass("selected");
+                    selectedNumbers.push(selectedNumber);
+
+                    if (selectedNumbers.length == endNumerals.length) {
+                        swal({
+                            title: "Thanks for playing!!!",
+                            imageUrl: "images/love.png"
+                        })
+                    }
+                }
+                else {
+                    if (selectedNumber != "") {
+                        $(this).addClass("animated shake");
+                        $(this).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                            $(this).removeClass("animated shake answer-wrong");
+                        });
+                    }
+                }
+            }
         });
     };
 
