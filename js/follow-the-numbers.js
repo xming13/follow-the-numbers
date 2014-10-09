@@ -45,7 +45,12 @@ XMing.GameStateManager = new function() {
 
         $(".game-grid").html("");
         _.each(numbers, function(number) {
-            $(".game-grid").append("<li><div class='content animated fadeIn'>" + number + "</li>");
+            $(".game-grid").append("<li><div class='content'>" + number + "</li>");
+        });
+
+        $(".game-grid").addClass("animated fadeIn");
+        $(".game-grid.animated.fadeIn").one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+            $(".game-grid.animated.fadeIn").removeClass("animated fadeIn");
         });
     };
 
@@ -92,9 +97,10 @@ XMing.GameStateManager = new function() {
                 }
                 else {
                     if (selectedNumber != "") {
-                        $(this).addClass("animated shake");
-                        $(this).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-                            $(this).removeClass("animated shake answer-wrong");
+                        var $thisFirstChild = $(this.firstChild);
+                        $thisFirstChild.addClass("animated shake");
+                        $thisFirstChild.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                            $thisFirstChild.removeClass("animated shake");
                         });
                     }
                 }
@@ -267,9 +273,9 @@ XMing.GameStateManager = new function() {
                 }
                 else {
                     if (selectedNumber != "") {
-                        $(this).addClass("animated shake");
-                        $(this).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-                            $(this).removeClass("animated shake answer-wrong");
+                        $(this.firstChild).addClass("animated shake");
+                        $(this.firstChild).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                            $(this.firstChild).removeClass("animated shake");
                         });
                     }
                 }
