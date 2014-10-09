@@ -94,8 +94,7 @@ XMing.GameStateManager = new function() {
                     $(this).addClass("selected");
                     selectedNumbers.push(selectedNumber);
                     self.checkResult();
-                }
-                else {
+                } else {
                     if (selectedNumber != "") {
                         var $thisFirstChild = $(this.firstChild);
                         $thisFirstChild.addClass("animated shake");
@@ -252,7 +251,7 @@ XMing.GameStateManager = new function() {
         $("#replay").show();
         $("#score-value").html(score);
 
-        var imageNumeral = (selectedNumeralType == "arabic" ? "images/1_2_3.png" : "images/I_II_III.png" );
+        var imageNumeral = (selectedNumeralType == "arabic" ? "images/1_2_3.png" : "images/I_II_III.png");
         swal({
             title: "Congratulations!",
             text: "Your score is " + score + "! :D",
@@ -274,8 +273,7 @@ XMing.GameStateManager = new function() {
                             imageUrl: "images/love.png"
                         })
                     }
-                }
-                else {
+                } else {
                     if (selectedNumber != "") {
                         $(this.firstChild).addClass("animated shake");
                         $(this.firstChild).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
