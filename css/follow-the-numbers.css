@@ -104,7 +104,7 @@ a {
 }
 
 #container > header nav a:hover {
-    background: #ff6464;
+    background: #ad0000;
 }
 
 #container > header nav a:hover:before {
@@ -123,7 +123,7 @@ a {
     font-weight: normal;
     line-height: 2;
     text-align: center;
-    color: #ff6464;
+    color: #ad0000;
     -webkit-font-smoothing: antialiased;
 }
 
