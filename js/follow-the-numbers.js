@@ -11,7 +11,8 @@ XMing.GameStateManager = new function() {
         return number + "";
     });
     var romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI"];
-    var numerals = romanNumerals;
+    var numerals = arabicNumerals;
+    var selectedNumeralType = "arabic";
 
     var roundNumber = 0;
     var selectedNumbers = [];
@@ -61,9 +62,8 @@ XMing.GameStateManager = new function() {
 
         this.loadGrid();
 
-        remainingTime = roundNumber + 3;
-        $("#timer-value").html(Math.floor(remainingTime))
-            .removeClass("animated fadeIn");
+        remainingTime = roundNumber + 3.5;
+        $("#timer-value").html(Math.floor(remainingTime));
 
         (function countdown() {
             remainingTime -= 0.5;
@@ -208,14 +208,17 @@ XMing.GameStateManager = new function() {
         this.onResize();
 
         swal({
-            title: "Choose a\nNumeric Type",
+            title: "Choose a Numeric Type",
             showCancelButton: true,
             confirmButtonText: "1 2 3",
+            confirmButtonColor: "#FF0000",
             cancelButtonText: "I II III"
         }, function() {
+            selectedNumeralType = "arabic";
             numerals = arabicNumerals;
             self.loadData();
         }, function() {
+            selectedNumeralType = "roman";
             numerals = romanNumerals;
             self.loadData();
         });
@@ -249,10 +252,11 @@ XMing.GameStateManager = new function() {
         $("#replay").show();
         $("#score-value").html(score);
 
+        var imageNumeral = (selectedNumeralType == "arabic" ? "images/1_2_3.png" : "images/I_II_III.png" );
         swal({
             title: "Congratulations!",
             text: "Your score is " + score + "! :D",
-            imageUrl: "images/word-grid.png"
+            imageUrl: imageNumeral
         });
 
         selectedNumbers = [];
