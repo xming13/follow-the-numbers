@@ -210,15 +210,17 @@ XMing.GameStateManager = new function() {
             title: "Choose a Numeric Type",
             showCancelButton: true,
             confirmButtonText: "1 2 3",
-            confirmButtonColor: "#FF0000",
+            confirmButtonColor: "#ff0000",
             cancelButtonText: "I II III"
-        }, function() {
-            selectedNumeralType = "arabic";
-            numerals = arabicNumerals;
-            self.loadData();
-        }, function() {
-            selectedNumeralType = "roman";
-            numerals = romanNumerals;
+        }, function(confirmed) {
+            if (confirmed) {
+                selectedNumeralType = "arabic";
+                numerals = arabicNumerals;
+            }
+            else {
+                selectedNumeralType = "roman";
+                numerals = romanNumerals;
+            }
             self.loadData();
         });
     };

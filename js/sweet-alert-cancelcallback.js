@@ -1,11 +1,11 @@
 // SweetAlert
 // 2014 (c) - Tristan Edwards
 // github.com/t4t5/sweetalert
-(function() {
+(function(window, document) {
 
-    var modalClass = '.sweet-alert',
-        overlay    = '.sweet-overlay',
-        alertTypes = ['error', 'warning', 'info', 'success'];
+    var modalClass   = '.sweet-alert',
+        overlayClass = '.sweet-overlay',
+        alertTypes   = ['error', 'warning', 'info', 'success'];
 
 
     /*
@@ -14,6 +14,9 @@
 
     var getModal = function() {
             return document.querySelector(modalClass);
+        },
+        getOverlay = function() {
+            return document.querySelector(overlayClass);
         },
         hasClass = function(elem, className) {
             return new RegExp(' ' + className + ' ').test(' ' + elem.className + ' ');
@@ -83,22 +86,24 @@
             return ('-' + parseInt(height / 2 + padding) + 'px');
         },
         fadeIn = function(elem, interval) {
-            var interval = interval || 16;
-            elem.style.opacity = 0;
-            elem.style.display = 'block';
-            var last = +new Date();
-            var tick = function() {
-                elem.style.opacity = +elem.style.opacity + (new Date() - last) / 100;
-                last = +new Date();
+            if(+elem.style.opacity < 1) {
+                interval = interval || 16;
+                elem.style.opacity = 0;
+                elem.style.display = 'block';
+                var last = +new Date();
+                var tick = function() {
+                    elem.style.opacity = +elem.style.opacity + (new Date() - last) / 100;
+                    last = +new Date();
 
-                if (+elem.style.opacity < 1) {
-                    setTimeout(tick, interval);
-                }
-            };
-            tick();
+                    if (+elem.style.opacity < 1) {
+                        setTimeout(tick, interval);
+                    }
+                };
+                tick();
+            }
         },
         fadeOut = function(elem, interval) {
-            var interval = interval || 16;
+            interval = interval || 16;
             elem.style.opacity = 1;
             var last = +new Date();
             var tick = function() {
@@ -112,15 +117,51 @@
                 }
             };
             tick();
+        },
+        fireClick = function(node) {
+            // Taken from http://www.nonobtrusive.com/2011/11/29/programatically-fire-crossbrowser-click-event-with-javascript/
+            // Then fixed for today's Chrome browser.
+            if (MouseEvent) {
+                // Up-to-date approach
+                var mevt = new MouseEvent('click', {
+                    view: window,
+                    bubbles: false,
+                    cancelable: true
+                });
+                node.dispatchEvent(mevt);
+            } else if ( document.createEvent ) {
+                // Fallback
+                var evt = document.createEvent('MouseEvents');
+                evt.initEvent('click', false, false);
+                node.dispatchEvent(evt);
+            } else if( document.createEventObject ) {
+                node.fireEvent('onclick') ;
+            } else if (typeof node.onclick === 'function' ) {
+                node.onclick();
+            }
+        },
+        stopEventPropagation = function(e) {
+            // In particular, make sure the space bar doesn't scroll the main window.
+            if (typeof e.stopPropagation === 'function') {
+                e.stopPropagation();
+                e.preventDefault();
+            } else if (window.event && window.event.hasOwnProperty('cancelBubble')) {
+                window.event.cancelBubble = true;
+            }
         };
 
+    // Remember state in cases where opening and handling a modal will fiddle with it.
+    var previousActiveElement,
+        previousDocumentClick,
+        previousWindowKeyDown,
+        lastFocusedButton;
 
     /*
      * Add modal + overlay to DOM
      */
 
     function initialize() {
-        var sweetHTML = '<div class="sweet-overlay"></div><div class="sweet-alert"><div class="icon error"><span class="x-mark"><span class="line left"></span><span class="line right"></span></span></div><div class="icon warning"> <span class="body"></span> <span class="dot"></span> </div> <div class="icon info"></div> <div class="icon success"> <span class="line tip"></span> <span class="line long"></span> <div class="placeholder"></div> <div class="fix"></div> </div> <div class="icon custom"></div> <h2>Title</h2><p>Text</p><button class="cancel">Cancel</button><button class="confirm">OK</button></div>',
+        var sweetHTML = '<div class="sweet-overlay" tabIndex="-1"></div><div class="sweet-alert" tabIndex="-1"><div class="icon error"><span class="x-mark"><span class="line left"></span><span class="line right"></span></span></div><div class="icon warning"> <span class="body"></span> <span class="dot"></span> </div> <div class="icon info"></div> <div class="icon success"> <span class="line tip"></span> <span class="line long"></span> <div class="placeholder"></div> <div class="fix"></div> </div> <div class="icon custom"></div> <h2>Title</h2><p>Text</p><button class="cancel" tabIndex="2">Cancel</button><button class="confirm" tabIndex="1">OK</button></div>',
             sweetWrap = document.createElement('div');
 
         sweetWrap.innerHTML = sweetHTML;
@@ -144,7 +185,7 @@
      * Global sweetAlert function
      */
 
-    window.sweetAlert = function() {
+    window.sweetAlert = window.swal = function() {
 
         // Default parameters
         var params = {
@@ -153,7 +194,9 @@
             type: null,
             allowOutsideClick: false,
             showCancelButton: false,
+            closeOnConfirm: true,
             confirmButtonText: 'OK',
+            confirmButtonColor: '#AEDEF4',
             cancelButtonText: 'Cancel',
             imageUrl: null,
             imageSize: null
@@ -180,22 +223,22 @@
                     return false;
                 }
 
-                params.title = arguments[0].title;
-                params.text = arguments[0].text || params.text;
-                params.type = arguments[0].type || params.type;
-                params.allowOutsideClick = arguments[0].allowOutsideClick || params.allowOutsideClick;
-                params.showCancelButton = arguments[0].showCancelButton || params.showCancelButton;
+                params.title              = arguments[0].title;
+                params.text               = arguments[0].text || params.text;
+                params.type               = arguments[0].type || params.type;
+                params.allowOutsideClick  = arguments[0].allowOutsideClick || params.allowOutsideClick;
+                params.showCancelButton   = arguments[0].showCancelButton !== undefined ? arguments[0].showCancelButton : params.showCancelButton;
+                params.closeOnConfirm     = arguments[0].closeOnConfirm !== undefined ? arguments[0].closeOnConfirm : params.closeOnConfirm;
 
-                if (params.showCancelButton) {
-                    params.confirmButtonText = 'Confirm'; // Show "Confirm" instead of "OK" if cancel button is visible
-                }
+                // Show "Confirm" instead of "OK" if cancel button is visible
+                params.confirmButtonText  = (params.showCancelButton) ? 'Confirm' : params.confirmButtonText;
 
-                params.confirmButtonText = arguments[0].confirmButtonText || params.confirmButtonText;
-                params.cancelButtonText = arguments[0].cancelButtonText || params.cancelButtonText;
-                params.imageUrl = arguments[0].imageUrl || params.imageUrl;
-                params.imageSize = arguments[0].imageSize || params.imageSize;
-                params.doneFunction = arguments[1] || null;
-                params.cancelFunction = arguments[2] || null;
+                params.confirmButtonText  = arguments[0].confirmButtonText || params.confirmButtonText;
+                params.confirmButtonColor = arguments[0].confirmButtonColor || params.confirmButtonColor;
+                params.cancelButtonText   = arguments[0].cancelButtonText || params.cancelButtonText;
+                params.imageUrl           = arguments[0].imageUrl || params.imageUrl;
+                params.imageSize          = arguments[0].imageSize || params.imageSize;
+                params.doneFunction       = arguments[1] || null;
 
                 break;
 
@@ -205,6 +248,8 @@
 
         }
 
+        //console.log(params.confirmButtonColor);
+
         setParameters(params);
         fixVerticalPosition();
         openModal();
@@ -213,28 +258,76 @@
         // Modal interactions
         var modal = getModal();
 
-        var onButtonClick = function(e) {
-            var target = e.target || e.srcElement,
-                clickedOnConfirm   = (target.className === 'confirm'),
-                clickedOnCancel    = (target.className === 'cancel'),
-                modalIsVisible     = hasClass(modal, 'visible'),
-                doneFunctionExists = (params.doneFunction && modal.getAttribute('data-has-done-function') === 'true'),
-                cancelFunctionExists = (params.cancelFunction && modal.getAttribute('data-has-cancel-function') === 'true');
+        // Mouse interactions
+        var onButtonEvent = function(e) {
 
-            if (clickedOnConfirm && doneFunctionExists && modalIsVisible) {
-                params.doneFunction();
+            var target = e.target || e.srcElement,
+                targetedConfirm    = (target.className === 'confirm'),
+                modalIsVisible     = hasClass(modal, 'visible'),
+                doneFunctionExists = (params.doneFunction && modal.getAttribute('data-has-done-function') === 'true');
+
+            switch (e.type) {
+                case ("mouseover"):
+                    if (targetedConfirm) {
+                        e.target.style.backgroundColor = colorLuminance(params.confirmButtonColor, -0.04);
+                    }
+                    break;
+                case ("mouseout"):
+                    if (targetedConfirm) {
+                        e.target.style.backgroundColor = params.confirmButtonColor;
+                    }
+                    break;
+                case ("mousedown"):
+                    if (targetedConfirm) {
+                        e.target.style.backgroundColor = colorLuminance(params.confirmButtonColor, -0.14);
+                    }
+                    break;
+                case ("mouseup"):
+                    if (targetedConfirm) {
+                        e.target.style.backgroundColor = colorLuminance(params.confirmButtonColor, -0.04);
+                    }
+                    break;
+                case ("focus"):
+                    var $confirmButton = modal.querySelector('button.confirm'),
+                        $cancelButton  = modal.querySelector('button.cancel');
+
+                    if (targetedConfirm) {
+                        $cancelButton.style.boxShadow = 'none';
+                    } else {
+                        $confirmButton.style.boxShadow = 'none';
+                    }
+                    break;
+                case ("click"):
+                    if (targetedConfirm && doneFunctionExists && modalIsVisible) {
+                        params.doneFunction(true);
+
+                        if(params.closeOnConfirm) {
+                            closeModal();
+                        }
+                    } else if (doneFunctionExists && modalIsVisible) {
+                        params.doneFunction(false);
+
+                        closeModal();
+                    } else {
+                        closeModal();
+                    }
+
+                    break;
             }
-            if (clickedOnCancel && cancelFunctionExists && modalIsVisible) {
-                params.cancelFunction();
-            }
-            closeModal();
         };
 
-        var buttons = modal.querySelectorAll('button');
-        for (var i = 0; i < buttons.length; i++) {
-            buttons[i].onclick = onButtonClick;
+        var $buttons = modal.querySelectorAll('button');
+        for (var i = 0; i < $buttons.length; i++) {
+            $buttons[i].onclick     = onButtonEvent;
+            $buttons[i].onmouseover = onButtonEvent;
+            $buttons[i].onmouseout  = onButtonEvent;
+            $buttons[i].onmousedown = onButtonEvent;
+            //$buttons[i].onmouseup   = onButtonEvent;
+            $buttons[i].onfocus     = onButtonEvent;
         }
 
+        // Remember the current document.onclick event.
+        previousDocumentClick = document.onclick;
         document.onclick = function(e) {
             var target = e.target || e.srcElement;
 
@@ -248,9 +341,118 @@
             }
         };
 
-    };
 
-    window.swal = window.sweetAlert; // Shorthand
+        // Keyboard interactions
+        var $okButton = modal.querySelector('button.confirm'),
+            $cancelButton = modal.querySelector('button.cancel'),
+            $modalButtons = modal.querySelectorAll('button:not([type=hidden])');
+
+
+        function handleKeyDown(e) {
+            var keyCode = e.keyCode || e.which;
+
+            if ([9,13,32,27].indexOf(keyCode) === -1) {
+                // Don't do work on keys we don't care about.
+                return;
+            }
+
+            var $targetElement = e.target || e.srcElement;
+
+            var btnIndex = -1; // Find the button - note, this is a nodelist, not an array.
+            for (var i = 0; i < $modalButtons.length; i++) {
+                if ($targetElement === $modalButtons[i]) {
+                    btnIndex = i;
+                    break;
+                }
+            }
+
+            if (keyCode === 9) {
+                // TAB
+                if (btnIndex === -1) {
+                    // No button focused. Jump to the confirm button.
+                    $targetElement = $okButton;
+                } else {
+                    // Cycle to the next button
+                    if (btnIndex === $modalButtons.length - 1) {
+                        $targetElement = $modalButtons[0];
+                    } else {
+                        $targetElement = $modalButtons[btnIndex + 1];
+                    }
+                }
+
+                stopEventPropagation(e);
+                $targetElement.focus();
+                setFocusStyle($targetElement, params.confirmButtonColor); // TODO
+
+            } else {
+                if (keyCode === 13 || keyCode === 32) {
+                    if (btnIndex === -1) {
+                        // ENTER/SPACE clicked outside of a button.
+                        $targetElement = $okButton;
+                    } else {
+                        // Do nothing - let the browser handle it.
+                        $targetElement = undefined;
+                    }
+                } else if (keyCode === 27 && !($cancelButton.hidden || $cancelButton.style.display === 'none')) {
+                    // ESC to cancel only if there's a cancel button displayed (like the alert() window).
+                    $targetElement = $cancelButton;
+                } else {
+                    // Fallback - let the browser handle it.
+                    $targetElement = undefined;
+                }
+
+                if ($targetElement !== undefined) {
+                    fireClick($targetElement, e);
+                }
+            }
+        }
+
+        previousWindowKeyDown = window.onkeydown;
+        window.onkeydown = handleKeyDown;
+
+        function handleOnBlur(e) {
+            var $targetElement = e.target || e.srcElement,
+                $focusElement = e.relatedTarget,
+                modalIsVisible = hasClass(modal, 'visible');
+
+            if (modalIsVisible) {
+                var btnIndex = -1; // Find the button - note, this is a nodelist, not an array.
+
+                if ($focusElement !== null) {
+                    // If we picked something in the DOM to focus to, let's see if it was a button.
+                    for (var i = 0; i < $modalButtons.length; i++) {
+                        if ($focusElement === $modalButtons[i]) {
+                            btnIndex = i;
+                            break;
+                        }
+                    }
+
+                    if (btnIndex === -1) {
+                        // Something in the dom, but not a visible button. Focus back on the button.
+                        $targetElement.focus();
+                    }
+                } else {
+                    // Exiting the DOM (e.g. clicked in the URL bar);
+                    lastFocusedButton = $targetElement;
+                }
+            }
+        }
+
+        $okButton.onblur = handleOnBlur;
+        $cancelButton.onblur = handleOnBlur;
+
+        window.onfocus = function() {
+            // When the user has focused away and focused back from the whole window.
+            window.setTimeout(function() {
+                // Put in a timeout to jump out of the event sequence. Calling focus() in the event
+                // sequence confuses things.
+                if (lastFocusedButton !== undefined) {
+                    lastFocusedButton.focus();
+                    lastFocusedButton = undefined;
+                }
+            }, 0);
+        };
+    };
 
 
     /*
@@ -266,10 +468,10 @@
             $confirmBtn = modal.querySelector('button.confirm');
 
         // Title
-        $title.innerHTML = escapeHtml(params.title);
+        $title.innerHTML = escapeHtml(params.title).split("\n").join("<br>");
 
         // Text
-        $text.innerHTML = escapeHtml(params.text || '');
+        $text.innerHTML = escapeHtml(params.text || '').split("\n").join("<br>");
         if (params.text) {
             show($text);
         }
@@ -341,6 +543,7 @@
         }
 
         // Cancel button
+        modal.setAttribute('data-has-cancel-button', params.showCancelButton);
         if (params.showCancelButton) {
             $cancelBtn.style.display = 'inline-block';
         } else {
@@ -355,6 +558,11 @@
             $confirmBtn.innerHTML = escapeHtml(params.confirmButtonText);
         }
 
+        // Set confirm button to selected background color
+        $confirmBtn.style.backgroundColor = params.confirmButtonColor;
+
+        // Set box-shadow to default focused button
+        setFocusStyle($confirmBtn, params.confirmButtonColor);
 
         // Allow outside click?
         modal.setAttribute('data-allow-ouside-click', params.allowOutsideClick);
@@ -362,10 +570,41 @@
         // Done-function
         var hasDoneFunction = (params.doneFunction) ? true : false;
         modal.setAttribute('data-has-done-function', hasDoneFunction);
+    }
 
-        // Cancel-function
-        var hasCancelFunction = (params.cancelFunction) ? true : false;
-        modal.setAttribute('data-has-cancel-function', hasCancelFunction);
+
+    /*
+     * Set hover, active and focus-states for buttons (source: http://www.sitepoint.com/javascript-generate-lighter-darker-color)
+     */
+
+    function colorLuminance(hex, lum) {
+        // Validate hex string
+        hex = String(hex).replace(/[^0-9a-f]/gi, '');
+        if (hex.length < 6) {
+            hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        }
+        lum = lum || 0;
+
+        // Convert to decimal and change luminosity
+        var rgb = "#", c, i;
+        for (i = 0; i < 3; i++) {
+            c = parseInt(hex.substr(i*2,2), 16);
+            c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+            rgb += ("00"+c).substr(c.length);
+        }
+
+        return rgb;
+    }
+
+    function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? parseInt(result[1], 16) + ', ' + parseInt(result[2], 16) + ', ' + parseInt(result[3], 16) : null;
+    }
+
+    // Add box-shadow style to button (depending on its chosen bg-color)
+    function setFocusStyle($button, bgColor) {
+        var rgbColor = hexToRgb(bgColor);
+        $button.style.boxShadow = '0 0 2px rgba(' + rgbColor +', 0.8), inset 0 0 0 1px rgba(0, 0, 0, 0.05)';
     }
 
 
@@ -376,10 +615,14 @@
 
     function openModal() {
         var modal = getModal();
-        fadeIn(document.querySelector(overlay), 10);
+        fadeIn(getOverlay(), 10);
         show(modal);
         addClass(modal, 'showSweetAlert');
         removeClass(modal, 'hideSweetAlert');
+
+        previousActiveElement = document.activeElement;
+        var $okButton = modal.querySelector('button.confirm');
+        $okButton.focus();
 
         setTimeout(function() {
             addClass(modal, 'visible');
@@ -388,7 +631,7 @@
 
     function closeModal() {
         var modal = getModal();
-        fadeOut(document.querySelector(overlay), 5);
+        fadeOut(getOverlay(), 5);
         fadeOut(modal, 5);
         removeClass(modal, 'showSweetAlert');
         addClass(modal, 'hideSweetAlert');
@@ -410,8 +653,16 @@
         removeClass($warningIcon, 'pulseWarning');
         removeClass($warningIcon.querySelector('.body'), 'pulseWarningIns');
         removeClass($warningIcon.querySelector('.dot'), 'pulseWarningIns');
-    }
 
+
+        // Reset the page to its previous state
+        window.onkeydown = previousWindowKeyDown;
+        document.onclick = previousDocumentClick;
+        if (previousActiveElement) {
+            previousActiveElement.focus();
+        }
+        lastFocusedButton = undefined;
+    }
 
 
     /*
@@ -420,24 +671,34 @@
 
     function fixVerticalPosition() {
         var modal = getModal();
-        //var height = parseInt(getTopMargin(modal), 10),
-        //marginTop = '-' + parseInt(height / 2, 10) + 'px';
 
         modal.style.marginTop = getTopMargin(getModal());
     }
 
-    if (document.addEventListener) {
-        document.addEventListener('DOMContentLoaded', function factorial() {
-            document.removeEventListener('DOMContentLoaded', arguments.callee, false);
-            initialize();
-        }, false);
-    } else if (document.attachEvent) {
-        document.attachEvent('onreadystatechange', function() {
-            if (document.readyState === 'complete') {
-                document.detachEvent('onreadystatechange', arguments.callee);
-                initialize();
-            }
-        });
-    }
 
-})();
+
+    /*
+     * If library is injected after page has loaded
+     */
+
+    (function () {
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+            initialize();
+        } else {
+            if (document.addEventListener) {
+                document.addEventListener('DOMContentLoaded', function factorial() {
+                    document.removeEventListener('DOMContentLoaded', arguments.callee, false);
+                    initialize();
+                }, false);
+            } else if (document.attachEvent) {
+                document.attachEvent('onreadystatechange', function() {
+                    if (document.readyState === 'complete') {
+                        document.detachEvent('onreadystatechange', arguments.callee);
+                        initialize();
+                    }
+                });
+            }
+        }
+    })();
+
+})(window, document);
