@@ -106,6 +106,7 @@
 <script src="https://xming13.github.io/games/js/xming-games.min.js"></script>
 <script src="js/sweet-alert-cancelcallback.js"></script>
 <script src="js/follow-the-numbers.min.js"></script>
+<script src="js/fastclick.min.js"></script>
 
 <script>
     function addLoadEvent(func) {
@@ -123,6 +124,8 @@
     }
 
     addLoadEvent(function() {
+        FastClick.attach(document.body);
+
         XMing.GameStateManager.init();
 
         $(".btn-play").click(function() {
