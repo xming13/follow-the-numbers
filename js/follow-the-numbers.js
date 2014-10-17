@@ -1,7 +1,7 @@
 var XMing = XMing || {};
 
 XMing.GameStateManager = new function() {
-
+    var windowWidth = 0;
     var gameState;
     var gameTimer;
     var remainingTime;
@@ -157,25 +157,35 @@ XMing.GameStateManager = new function() {
     };
 
     this.onResize = function(event) {
-        var lis = $(".game-grid").children("li");
+        if($(window).width() != windowWidth){
+            windowWidth = $(window).width();
 
-        var liMaxWidth = _.max(lis, function(li) {
-            return $(li).width();
-        });
-        var maxWidth = $(liMaxWidth).width();
+            if (injectedStyleDiv) {
+                injectedStyleDiv.html("");
+            }
 
-        _.each(lis, function(li) {
-            $(li).height(maxWidth);
-        });
+            var lis = $(".game-grid").children("li");
 
-        var styles = "<style>" + ".game-grid li { height: " + maxWidth + "px; } " + ".game-grid li .content { font-size: " + (maxWidth * 0.5) + "px; } " + "#result-content { font-size: " + (maxWidth * 0.8) + "px; } " + ".game-letters span { font-size: " + (maxWidth * 0.2) + "px; margin-left: " + (maxWidth * 0.1) + "px; } " + "</style>";
+            var liMaxWidth = _.max(lis, function(li) {
+                return $(li).width();
+            });
+            var maxWidth = $(liMaxWidth).width();
 
-        if (injectedStyleDiv) {
-            injectedStyleDiv.html(styles);
-        } else {
-            injectedStyleDiv = $("<div />", {
-                html: styles
-            }).appendTo("body");
+            var styles = "<style>";
+            styles += " ul.game-grid { width: " + (maxWidth * 4) + "px; } ";
+            styles += " .game-grid li { height: " + maxWidth + "px; width: " + maxWidth + "px; } ";
+            styles += " .game-grid li .content { font-size: " + (maxWidth * 0.5) + "px; } ";
+            styles += " #result-content { font-size: " + (maxWidth * 0.8) + "px; } ";
+            styles += " .game-letters span { font-size: " + (maxWidth * 0.2) + "px; margin-left: " + (maxWidth * 0.1) + "px; } ";
+            styles += "</style>";
+
+            if (injectedStyleDiv) {
+                injectedStyleDiv.html(styles);
+            } else {
+                injectedStyleDiv = $("<div />", {
+                    html: styles
+                }).appendTo("body");
+            }
         }
     };
 
@@ -204,6 +214,9 @@ XMing.GameStateManager = new function() {
 
         $("#timer").show();
         $("#replay").hide();
+
+        // set to 0 to force resize
+        windowWidth = 0;
         this.onResize();
 
         swal({
