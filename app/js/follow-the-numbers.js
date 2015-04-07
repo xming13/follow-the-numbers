@@ -200,6 +200,16 @@ XMing.GameStateManager = new function() {
             self.startGame();
         });
 
+        $(".btn-leaderboard").click(function() {
+            self.showLeaderboard();
+        });
+
+        $(".icon-back").click(function() {
+            $(".panel-game").hide();
+            $(".panel-leaderboard").hide();
+            $(".panel-main").show();
+        });
+
         $(".icon-repeat").click(function() {
             self.startGame();
         });
@@ -211,6 +221,12 @@ XMing.GameStateManager = new function() {
         score = 0;
         roundNumber = 0;
 
+        $(".panel-main").hide();
+        $(".panel-game").show();
+        $('html, body').animate({
+            scrollTop: $(".panel-container").offset().top
+        }, 'fast');
+
         $("#timer").show();
         $("#replay").hide();
 
@@ -218,21 +234,14 @@ XMing.GameStateManager = new function() {
         windowWidth = 0;
         this.onResize();
 
-        $(".panel-main").hide();
-        $(".panel-game").show();
-        $('html, body').animate({
-            scrollTop: $(".panel-container").offset().top
-        }, 'fast');
-
-        
         swal({
             title: "Choose a Numeric Type",
             showCancelButton: true,
             confirmButtonText: "1 2 3",
             confirmButtonColor: "#ff0000",
             cancelButtonText: "I II III"
-        }, function(confirmed) {
-            if (confirmed) {
+        }, function(isConfirm) {
+            if (isConfirm) {
                 selectedNumeralType = "arabic";
                 numerals = arabicNumerals;
             } else {
@@ -274,7 +283,36 @@ XMing.GameStateManager = new function() {
         swal({
             title: "Congratulations!",
             text: "Your score is " + score + "! :D",
-            imageUrl: imageNumeral
+            imageUrl: imageNumeral,
+            closeOnConfirm: false
+        }, function() {
+            swal({
+                title: "Thanks for playing!!!",
+                imageUrl: "images/love.png",
+                type: "input",
+                text: "Write your name here! It will appear in the leaderboard!",
+                closeOnConfirm: false
+            }, function(playerName) {
+                if (playerName == "") {
+                    swal.showInputError("You need to write something! A nickname is fine too!");
+                    return false;
+                } else {
+                    $.ajax({
+                        method: "POST",
+                        url: 'http://weiseng.redairship.com/leaderboard/api/1/highscore.json',
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            game_id: 5,
+                            username: playerName,
+                            score: score
+                        })
+                    }).success(function(data) {
+                        swal("Congratulations!", "You are currently ranked " + data.rank_text + "!", "success");
+                    }).fail(function() {
+                        swal("Oops...", "Something went wrong!", "error");
+                    });
+                }
+            });
         });
 
         selectedNumbers = [];
@@ -288,7 +326,7 @@ XMing.GameStateManager = new function() {
 
                     if (selectedNumbers.length == endNumerals.length) {
                         swal({
-                            title: "Thanks for playing!!!",
+                            title: "Thanks for playing again!!!",
                             imageUrl: "images/love.png"
                         })
                     }
@@ -301,6 +339,30 @@ XMing.GameStateManager = new function() {
                     }
                 }
             }
+        });
+    };
+    this.showLeaderboard = function() {
+        $(".panel-main").hide();
+        $(".panel-leaderboard").show();
+
+        $(".highscore-list").html("");
+
+        $.get("http://weiseng.redairship.com/leaderboard/api/1/highscore.json?game_id=5", function(data) {
+            var numDummyData = 10 - data.length;
+            for (var i = 0; i < numDummyData; i++) {
+                data.push({
+                    username: '----------',
+                    score: 0
+                });
+            }
+
+            _.each(data, function(highscore, index) {
+                setTimeout(function() {
+                    $(".highscore-list").append('<li class="animated slideInUp">' + (index + 1) + ': ' + highscore.username + ' - ' + highscore.score + '</li>');
+                }, index * 200);
+            });
+        }).fail(function() {
+            swal("Oops...", "Something went wrong!", "error");
         });
     };
 
