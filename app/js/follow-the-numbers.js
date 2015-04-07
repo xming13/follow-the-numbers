@@ -26,12 +26,7 @@ XMing.GameStateManager = new function() {
         END: "end"
     };
 
-    this.init = function() {
-        window.addEventListener("resize", this.onResize.bind(this), false);
-        this.initGame();
-    };
-
-    this.loadGrid = function() {
+    this.setupGrid = function() {
 
         selectedNumbers = [];
 
@@ -54,13 +49,12 @@ XMing.GameStateManager = new function() {
             $(".game-grid.animated.fadeIn").removeClass("animated fadeIn");
         });
     };
-
-    this.loadData = function() {
+    this.setupGameNode = function() {
         var self = this;
 
         roundNumber++;
 
-        this.loadGrid();
+        this.setupGrid();
 
         remainingTime = roundNumber + 3.5;
         $("#timer-value").html(Math.floor(remainingTime));
@@ -80,7 +74,7 @@ XMing.GameStateManager = new function() {
                     .css("color", "rgba(17, 189, 255, 255)");
                 $("#timer-value").removeClass("animated fadeIn");
 
-                self.loadNextRound();
+                self.setupNextRound();
             } else {
                 gameTimer = setTimeout(countdown, 500);
             }
@@ -106,7 +100,25 @@ XMing.GameStateManager = new function() {
             }
         });
     };
+    this.setupNextRound = function() {
+        var self = this;
 
+        var gameGrid = $("ul.game-grid");
+        $("#result")
+            .width(gameGrid.width())
+            .height(gameGrid.height())
+            .show();
+
+        _.delay(function() {
+            $("#result").hide();
+
+            if (roundNumber < numerals.length) {
+                self.setupGameNode();
+            } else {
+                self.endGame();
+            }
+        }, 1000);
+    };
     this.checkResult = function() {
         if (selectedNumbers.length == roundNumber) {
             $("#result-content")
@@ -132,32 +144,12 @@ XMing.GameStateManager = new function() {
                 }
             });
             clearTimeout(gameTimer);
-            this.loadNextRound();
+            this.setupNextRound();
         }
     };
 
-    this.loadNextRound = function() {
-        var self = this;
-
-        var gameGrid = $("ul.game-grid");
-        $("#result")
-            .width(gameGrid.width())
-            .height(gameGrid.height())
-            .show();
-
-        _.delay(function() {
-            $("#result").hide();
-
-            if (roundNumber < numerals.length) {
-                self.loadData();
-            } else {
-                self.endGame();
-            }
-        }, 1000);
-    };
-
     this.onResize = function(event) {
-        if($(window).width() != windowWidth){
+        if ($(window).width() != windowWidth) {
             windowWidth = $(window).width();
 
             if (injectedStyleDiv) {
@@ -188,23 +180,30 @@ XMing.GameStateManager = new function() {
             }
         }
     };
-
     this.preloadImage = function() {
         var imgLove = new Image();
         imgLove.src = "images/love.png";
     };
 
-    // game status operation
+    // Game status operation
     this.initGame = function() {
+        var self = this;
         gameState = GAME_STATE_ENUM.INITIAL;
+
         this.preloadImage();
 
-        var self = this;
+        window.addEventListener("resize", this.onResize.bind(this), false);
+
+        FastClick.attach(document.body);
+
+        $(".btn-play").click(function() {
+            self.startGame();
+        });
+
         $(".icon-repeat").click(function() {
             self.startGame();
         });
     };
-
     this.startGame = function() {
         gameState = GAME_STATE_ENUM.START;
         var self = this;
@@ -219,6 +218,13 @@ XMing.GameStateManager = new function() {
         windowWidth = 0;
         this.onResize();
 
+        $(".panel-main").hide();
+        $(".panel-game").show();
+        $('html, body').animate({
+            scrollTop: $(".panel-container").offset().top
+        }, 'fast');
+
+        
         swal({
             title: "Choose a Numeric Type",
             showCancelButton: true,
@@ -229,15 +235,13 @@ XMing.GameStateManager = new function() {
             if (confirmed) {
                 selectedNumeralType = "arabic";
                 numerals = arabicNumerals;
-            }
-            else {
+            } else {
                 selectedNumeralType = "roman";
                 numerals = romanNumerals;
             }
-            self.loadData();
+            self.setupGameNode();
         });
     };
-
     this.endGame = function() {
         gameState = GAME_STATE_ENUM.END;
 
@@ -300,16 +304,18 @@ XMing.GameStateManager = new function() {
         });
     };
 
-    // check game state
+    // Check game state
     this.isGameStateInitial = function() {
         return gameState == GAME_STATE_ENUM.INITIAL;
     };
-
     this.isGameStateStart = function() {
         return gameState == GAME_STATE_ENUM.START;
     };
-
     this.isGameStateEnd = function() {
         return gameState == GAME_STATE_ENUM.END;
     };
 };
+
+$(function() {
+    XMing.GameStateManager.initGame();
+})

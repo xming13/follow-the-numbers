@@ -17,7 +17,11 @@
     <meta property="og:site_name" content="Follow the numbers" />
     <link rel="shortcut icon" href="favicon.ico">
 
-    <link rel="stylesheet" href="css/app.css">
+    <!-- build:css css/app.css -->
+    <link rel="stylesheet" type="text/css" href="../node_modules/animate.css/animate.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../node_modules/sweetalert/lib/sweet-alert.css"/>
+    <link rel="stylesheet" type="text/css" href="css/follow-the-numbers.css"/>
+    <!-- endbuild -->
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="https://xming13.github.io/games/css/xming-games.min.css" />
     <script>
@@ -55,8 +59,8 @@
         </nav>
     </header>
     <div class="main-content">
-        <div class="panel-container" id="panel-container" name="panel-container">
-            <div id="panel-main" class="panel-main">
+        <div class="panel-container" name="panel-container">
+            <div class="panel-main">
                 <div class="title">
                     Follow
                 </div>
@@ -73,7 +77,7 @@
                     </a>
                 </div>
             </div>
-            <div id="panel-game" class="panel-game" style="display: none;">
+            <div class="panel-game" style="display: none;">
                 <div class="scoreboard clearfix">
                     <div id="replay" style="display: none;">
                         <a class="icon-repeat" data-info="Play again">
@@ -103,40 +107,15 @@
     </div>
 </div>
 
-<script src="js/app.js"></script>
+<!-- build:js js/app.js -->
+<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../node_modules/underscore/underscore-min.js"></script>
+<script src="../node_modules/fastclick/lib/fastclick.js"></script>
+<script src="../node_modules/sweetalert/lib/sweet-alert.min.js"></script>
+<script src="js/follow-the-numbers.js"></script>
+<!-- endbuild -->
 <script src="https://xming13.github.io/games/js/xming-games.min.js"></script>
 
-<script>
-    function addLoadEvent(func) {
-        var oldonload = window.onload;
-        if (typeof window.onload != 'function') {
-            window.onload = func;
-        } else {
-            window.onload = function() {
-                if (oldonload) {
-                    oldonload();
-                }
-                func();
-            }
-        }
-    }
-
-    addLoadEvent(function() {
-        FastClick.attach(document.body);
-
-        XMing.GameStateManager.init();
-
-        $(".btn-play").click(function() {
-            $("#panel-main").hide();
-            $("#panel-game").show();
-            $('html, body').animate({
-                scrollTop: $("#panel-container").offset().top
-            }, 'fast');
-
-            XMing.GameStateManager.startGame();
-        });
-    });
-</script>
 </body>
 
 </html>
