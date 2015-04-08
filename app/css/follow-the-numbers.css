@@ -451,7 +451,7 @@ and (max-device-width : 540px) {
         left: 0;
     }
 
-    .icon-back:after {
+    .icon-circle:after {
         content: '';
     }
 }
