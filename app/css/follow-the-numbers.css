@@ -399,21 +399,21 @@ a {
 }
 
 .heading {
-    color: #5F5F31;
+    color: #B30000;
     font-size: 30px;
 }
 
 .highscore-list {
     margin: 0;
     padding: 0;
-    background: #FFF6B8;
+    background: #FFB8B8;
 }
 
 .highscore-list li {
     height: 40px;
-    border: 2px solid #B69800;
-    background: #FCFF7E;
-    color: #96874A;
+    border: 2px solid #B60000;
+    background: #FF7E7E;
+    color: #980E0E;
     font-size: 20px;
     line-height: 40px;
     list-style: none;
