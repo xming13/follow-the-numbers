@@ -3,6 +3,7 @@ var XMing = XMing || {};
 XMing.GameStateManager = new function() {
     var windowWidth = 0;
     var gameState;
+    var userData;
     var gameTimer;
     var remainingTime;
     var score = 0;
@@ -19,6 +20,7 @@ XMing.GameStateManager = new function() {
 
     var injectedStyleDiv;
 
+    var VERSION_NUMBER = 1;
     var GAME_STATE_ENUM = {
         INITIAL: "initial",
         START: "start",
@@ -148,7 +150,7 @@ XMing.GameStateManager = new function() {
         }
     };
 
-    this.onResize = function(event) {
+    this.onResize = function() {
         if ($(window).width() != windowWidth) {
             windowWidth = $(window).width();
 
@@ -183,6 +185,15 @@ XMing.GameStateManager = new function() {
     this.preloadImage = function() {
         var imgLove = new Image();
         imgLove.src = "images/love.png";
+
+        var imgRedEgg = new Image();
+        imgRedEgg.src = "images/red-egg.png";
+
+        var imgOrangeEgg = new Image();
+        imgOrangeEgg.src = "images/orange-egg.png";
+
+        var imgBlueEgg = new Image();
+        imgBlueEgg.src = "images/blue-egg.png";
     };
 
     // Game status operation
@@ -190,11 +201,17 @@ XMing.GameStateManager = new function() {
         var self = this;
         gameState = GAME_STATE_ENUM.INITIAL;
 
-        this.preloadImage();
-
         window.addEventListener("resize", this.onResize.bind(this), false);
 
         FastClick.attach(document.body);
+
+        this.preloadImage();
+
+        userData = this.loadData();
+
+        swal.setDefaults({
+            confirmButtonColor: '#F53B3B'
+        });
 
         $(".btn-play").click(function() {
             self.startGame();
@@ -213,6 +230,8 @@ XMing.GameStateManager = new function() {
         $(".icon-repeat").click(function() {
             self.startGame();
         });
+
+        this.checkPlayedEasterEgg();
     };
     this.startGame = function() {
         gameState = GAME_STATE_ENUM.START;
@@ -326,8 +345,9 @@ XMing.GameStateManager = new function() {
 
                     if (selectedNumbers.length == endNumerals.length) {
                         swal({
-                            title: "Thanks for playing again!!!",
-                            imageUrl: "images/love.png"
+                            title: 'Congratulations!',
+                            text: 'You have found the Red Egg!',
+                            imageUrl: 'images/red-egg.png'
                         })
                     }
                 } else {
@@ -340,12 +360,23 @@ XMing.GameStateManager = new function() {
                 }
             }
         });
+
+        if (!userData.played.numbers) {
+            userData.played.numbers = true;
+            this.saveData(userData);
+        }
     };
     this.showLeaderboard = function() {
         $(".panel-main").hide();
         $(".panel-leaderboard").show();
 
         $(".highscore-list").html("");
+
+        if (!userData.leaderboard.numbers) {
+            userData.leaderboard.numbers = true;
+            this.saveData(userData);
+            this.checkLeaderboardEasterEgg();
+        }
 
         $.get("http://weiseng.redairship.com/leaderboard/api/1/highscore.json?game_id=5", function(data) {
             var numDummyData = 10 - data.length;
@@ -375,6 +406,91 @@ XMing.GameStateManager = new function() {
     };
     this.isGameStateEnd = function() {
         return gameState == GAME_STATE_ENUM.END;
+    };
+
+    // Easter Egg
+    this.checkPlayedEasterEgg = function() {
+        if (!userData.easterEgg.allPlayed) {
+            if (_.every(userData.played)) {
+                userData.easterEgg.allPlayed = true;
+                this.saveData(userData);
+                swal({
+                    title: 'Congratulations!',
+                    text: 'You have found the Blue Egg!',
+                    imageUrl: 'images/blue-egg.png'
+                });
+            }
+        }
+    };
+    this.checkLeaderboardEasterEgg = function() {
+        if (!userData.easterEgg.allLeaderboard) {
+            if (_.every(userData.leaderboard)) {
+                userData.easterEgg.allLeaderboard = true;
+                this.saveData(userData);
+                swal({
+                    title: 'Congratulations!',
+                    text: 'You have found the Ninja Egg!',
+                    imageUrl: 'images/ninja-egg.png'
+                });
+            }
+        }
+    };
+
+    // Local storage
+    this.saveData = function(userData) {
+        if (window.localStorage) {
+            window.localStorage.setItem('data', btoa(encodeURIComponent(JSON.stringify(userData))));
+        }
+    };
+    this.loadData = function() {
+        if (window.localStorage) {
+            var data = window.localStorage.getItem('data');
+            if (data) {
+                var parsedData = JSON.parse(decodeURIComponent(atob(data)));
+                // make sure version is the same
+                if (parsedData.version === VERSION_NUMBER) {
+                    return parsedData;
+                }
+            }
+        }
+        var data = {
+            played: {
+                bunny: false,
+                star: false,
+                specialOne: false,
+                mushrooms: false,
+                word: false,
+                numbers: false,
+                squirrel: false
+            },
+            leaderboard: {
+                bunny: false,
+                star: false,
+                specialOne: false,
+                mushrooms: false,
+                word: false,
+                numbers: false,
+                squirrel: false
+            },
+            squirrel: {
+                level: 0,
+                inHallOfFame: false
+            },
+            easterEgg: {
+                allGames: false,
+                allLeaderboard: false,
+                findTheWord: false,
+                followTheNumbers: false,
+                spotTheSpecialOne: false,
+                mushrooms: false,
+                squirrel: false
+            },
+            version: VERSION_NUMBER
+        };
+
+        this.saveData(data);
+
+        return data;
     };
 };
 
