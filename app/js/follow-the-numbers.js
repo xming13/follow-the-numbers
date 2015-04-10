@@ -189,11 +189,11 @@ XMing.GameStateManager = new function() {
         var imgRedEgg = new Image();
         imgRedEgg.src = "images/red-egg.png";
 
-        var imgOrangeEgg = new Image();
-        imgOrangeEgg.src = "images/orange-egg.png";
-
         var imgBlueEgg = new Image();
         imgBlueEgg.src = "images/blue-egg.png";
+
+        var imgNinjaEgg = new Image();
+        imgNinjaEgg.src = "images/ninja-egg.png";
     };
 
     // Game status operation
@@ -348,7 +348,7 @@ XMing.GameStateManager = new function() {
                             title: 'Congratulations!',
                             text: 'You have found the Red Egg!',
                             imageUrl: 'images/red-egg.png'
-                        })
+                        });
                     }
                 } else {
                     if (selectedNumber != "") {
