@@ -344,11 +344,22 @@ XMing.GameStateManager = new function() {
                     selectedNumbers.push(selectedNumber);
 
                     if (selectedNumbers.length == endNumerals.length) {
-                        swal({
-                            title: 'Congratulations!',
-                            text: 'You have found the Red Egg!',
-                            imageUrl: 'images/red-egg.png'
-                        });
+                        if (!userData.easterEgg.numbers) {
+                            userData.easterEgg.numbers = true;
+                            self.saveData(userData);
+                            swal({
+                                title: 'Congratulations!',
+                                text: 'You have found the Red Egg!',
+                                imageUrl: 'images/red-egg.png'
+                            });
+                        } else {
+                            swal({
+                                title: 'Congra... Oops!',
+                                text: 'You have collected the Red Egg already!',
+                                imageUrl: 'images/red-egg.png'
+                            });
+                        }
+
                     }
                 } else {
                     if (selectedNumber != "") {
