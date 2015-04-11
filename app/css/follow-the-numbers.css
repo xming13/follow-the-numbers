@@ -419,6 +419,10 @@ a {
     list-style: none;
 }
 
+.sweet-alert.choose button.cancel {
+    background-color: #FF6969;
+}
+
 /* Desktops and laptops ----------- */
 @media only screen and (min-width: 1224px) {
 }

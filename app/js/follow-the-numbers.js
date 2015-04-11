@@ -6,6 +6,7 @@ XMing.GameStateManager = new function() {
     var userData;
     var gameTimer;
     var remainingTime;
+    var roundStartTime;
     var score = 0;
 
     var arabicNumerals = _.each(_.range(1, 17), function(number) {
@@ -58,8 +59,8 @@ XMing.GameStateManager = new function() {
 
         this.setupGrid();
 
+        roundStartTime = new Date();
         remainingTime = roundNumber + 3.5;
-        $("#timer-value").html(Math.floor(remainingTime));
 
         (function countdown() {
             remainingTime -= 0.5;
@@ -73,7 +74,7 @@ XMing.GameStateManager = new function() {
                 $("#result-content")
                     .html("Time's up!")
                     .addClass('animated bounceIn')
-                    .css("color", "rgba(17, 189, 255, 255)");
+                    .css("color", "#11BDFF");
                 $("#timer-value").removeClass("animated fadeIn");
 
                 self.setupNextRound();
@@ -126,12 +127,16 @@ XMing.GameStateManager = new function() {
             $("#result-content")
                 .html("Correct!")
                 .addClass('animated bounceIn')
-                .css("color", "rgba(0, 255, 0, 255)");
+                .css("color", "#0F0");
 
-            score += remainingTime * 10;
+            var roundEndTime = new Date();
+            var timeGiven = roundNumber + 3.0;
+            var timeRemained = timeGiven - (roundEndTime.getTime() - roundStartTime.getTime()) / 1000;
+            var scoreGained = Math.ceil(timeRemained * 10);
+            score += scoreGained;
             $(".score-change")
-                .html("+" + remainingTime * 10)
-                .css("color", "rgba(0, 255, 0, 255)");
+                .html("+" + scoreGained)
+                .css("color", "#0F0");
 
             $("#timer-value").removeClass("animated fadeIn");
             $("#score-value").html(score);
@@ -257,8 +262,9 @@ XMing.GameStateManager = new function() {
             title: "Choose a Numeric Type",
             showCancelButton: true,
             confirmButtonText: "1 2 3",
-            confirmButtonColor: "#ff0000",
-            cancelButtonText: "I II III"
+            confirmButtonColor: "#FF0000",
+            cancelButtonText: "I II III",
+            customClass: 'choose'
         }, function(isConfirm) {
             if (isConfirm) {
                 selectedNumeralType = "arabic";
