@@ -311,6 +311,7 @@ XMing.GameStateManager = new function() {
             imageUrl: imageNumeral,
             closeOnConfirm: false
         }, function() {
+            var postingInProgress = false;
             swal({
                 title: "Thanks for playing!!!",
                 imageUrl: "images/love.png",
@@ -321,7 +322,12 @@ XMing.GameStateManager = new function() {
                 if (playerName == "") {
                     swal.showInputError("You need to write something! A nickname is fine too!");
                     return false;
+                }
+
+                if (postingInProgress) {
+                    return false;
                 } else {
+                    postingInProgress = true;
                     $.ajax({
                         method: "POST",
                         url: 'http://weiseng.redairship.com/leaderboard/api/1/highscore.json',
