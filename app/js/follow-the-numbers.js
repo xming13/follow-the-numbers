@@ -496,16 +496,16 @@ XMing.GameStateManager = new function() {
             squirrel: {
                 level: 0,
                 inHallOfFame: false
-            }   
+            },
             easterEgg: {
                 allGames: false,
                 allLeaderboard: false,
-                findTheWord: false,
-                followTheNumbers: false,
-                spotTheSpecialOne: false,
+                word: false,
+                numbers: false,
+                specialOne: false,
                 mushrooms: false,
                 squirrel: false
-            },ct
+            },
             collectAll: false,
             version: VERSION_NUMBER
         };
