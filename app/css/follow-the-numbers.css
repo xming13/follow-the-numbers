@@ -99,7 +99,7 @@ a {
 
 .scoreboard {
   height: 35px;
-  margin-bottom: 15px; }
+  margin-bottom: 10px; }
 
 .icon-circle {
   display: block;
@@ -270,16 +270,16 @@ a {
   margin: 0;
   padding: 0;
   background: #FFB8B8;
-  min-height: 400px; }
-
-.highscore-list li {
-  height: 40px;
-  border: 2px solid #B60000;
-  background: #FF7E7E;
-  color: #980E0E;
-  font-size: 20px;
-  line-height: 40px;
-  list-style: none; }
+  min-height: 402px; }
+  .highscore-list li {
+    height: 42px;
+    margin-bottom: -2px;
+    border: 2px solid #B60000;
+    background: #FF7E7E;
+    color: #980E0E;
+    font-size: 20px;
+    line-height: 42px;
+    list-style: none; }
 
 .sweet-alert.choose button.cancel {
   background-color: #FF6969; }
@@ -340,8 +340,12 @@ a {
   height: 20px;
   overflow: hidden !important; }
 
-@media only screen and (min-device-width: 320px) and (max-device-width: 540px) {
+/* Mobile Phones Portrait or Landscape */
+@media screen and (max-device-width: 640px) {
   .main-content {
+    margin: 0; }
+
+  .subtitle {
     margin: 0; }
 
   .panel-game,
@@ -364,6 +368,10 @@ a {
     content: ''; }
 
   .highscore-list {
-    min-height: 360px; } }
+    min-height: 302px; }
+    .highscore-list li {
+      height: 32px;
+      line-height: 32px;
+      font-size: 16px; } }
 
 /*# sourceMappingURL=follow-the-numbers.css.map */
