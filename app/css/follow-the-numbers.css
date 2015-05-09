@@ -368,6 +368,9 @@ a {
   .icon-circle:after {
     content: ''; }
 
+  .scoreboard {
+    margin-bottom: 10px; }
+
   .highscore-list {
     min-height: 302px; }
     .highscore-list li {
