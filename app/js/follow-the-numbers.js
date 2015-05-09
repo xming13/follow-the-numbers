@@ -44,12 +44,11 @@ XMing.GameStateManager = new function() {
 
         $(".game-grid").html("");
         _.each(numbers, function(number) {
-            $(".game-grid").append("<li><div class='content'>" + number + "</li>");
+            $(".game-grid").append("<li><div class='content animated fadeIn'>" + number + "</li>");
         });
 
-        $(".game-grid").addClass("animated fadeIn");
-        $(".game-grid.animated.fadeIn").one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-            $(".game-grid.animated.fadeIn").removeClass("animated fadeIn");
+        $(".game-grid .animated.fadeIn").one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+            $(this).removeClass("animated fadeIn");
         });
     };
     this.setupGameNode = function() {
@@ -168,14 +167,16 @@ XMing.GameStateManager = new function() {
             var liMaxWidth = _.max(lis, function(li) {
                 return $(li).width();
             });
-            var maxWidth = $(liMaxWidth).width();
+            // +2px for the li border
+            var liWidth = $(liMaxWidth).width() + 2;
 
             var styles = "<style>";
-            styles += " ul.game-grid { width: " + (maxWidth * 4) + "px; } ";
-            styles += " .game-grid li { height: " + maxWidth + "px; width: " + maxWidth + "px; } ";
-            styles += " .game-grid li .content { font-size: " + (maxWidth * 0.5) + "px; } ";
-            styles += " #result-content { font-size: " + (maxWidth * 0.8) + "px; } ";
-            styles += " .game-letters span { font-size: " + (maxWidth * 0.2) + "px; margin-left: " + (maxWidth * 0.1) + "px; } ";
+            // + 2px for the ul border
+            styles += " ul.game-grid { width: " + (liWidth * 4 + 2) + "px; } ";
+            styles += " .game-grid li { height: " + liWidth + "px; width: " + liWidth + "px; } ";
+            styles += " .game-grid li .content { font-size: " + (liWidth * 0.5) + "px; } ";
+            styles += " #result-content { font-size: " + (liWidth * 0.8) + "px; } ";
+            styles += " .game-letters span { font-size: " + (liWidth * 0.2) + "px; margin-left: " + (liWidth * 0.1) + "px; } ";
             styles += "</style>";
 
             if (injectedStyleDiv) {

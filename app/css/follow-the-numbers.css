@@ -42,7 +42,7 @@ a {
   margin: 0 auto 30px; }
 
 .panel-container {
-  padding: 2%;
+  padding: 3%;
   text-align: center; }
 
 .panel-main {
@@ -210,7 +210,8 @@ a {
   list-style: none;
   position: relative;
   background: #c60000;
-  color: #fff; }
+  color: #fff;
+  border: 1px solid #fff; }
 
 .game-grid li {
   display: table;
@@ -350,7 +351,7 @@ a {
 
   .panel-game,
   .panel-leaderboard {
-    width: 99%; }
+    width: 100%; }
 
   .game-grid li:after {
     width: 20px;
@@ -363,6 +364,10 @@ a {
 
   #result {
     left: 0; }
+
+  .heading {
+    font-size: 25px;
+    line-height: 40px; }
 
   .icon-circle:after {
     content: ''; }
