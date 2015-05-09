@@ -400,6 +400,10 @@ a {
 @media only screen
 and (min-device-width : 320px)
 and (max-device-width : 540px) {
+    .main-content {
+        margin: 0;
+    }
+
     .panel-game,
     .panel-leaderboard {
         width: 99%;
@@ -422,5 +426,9 @@ and (max-device-width : 540px) {
 
     .icon-circle:after {
         content: '';
+    }
+
+    .highscore-list {
+        min-height: 360px;
     }
 }
