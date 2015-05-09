@@ -215,9 +215,7 @@ a {
 
 .game-grid li {
   display: table;
-  position: relative;
   float: left;
-  overflow: hidden;
   width: 25%;
   cursor: pointer;
   border: 1px solid #fff; }

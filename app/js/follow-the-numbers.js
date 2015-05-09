@@ -106,9 +106,11 @@ XMing.GameStateManager = new function() {
         var self = this;
 
         var gameGrid = $("ul.game-grid");
+
+        // +2px for the border
         $("#result")
-            .width(gameGrid.width())
-            .height(gameGrid.height())
+            .width(gameGrid.width() + 2)
+            .height(gameGrid.height() + 2)
             .show();
 
         _.delay(function() {
