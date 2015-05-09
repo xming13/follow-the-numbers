@@ -46,7 +46,6 @@ a {
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    margin: 0 auto 30px;
 }
 
 .panel-container {
@@ -117,7 +116,7 @@ a {
 
 .scoreboard {
     height: 35px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .icon-circle {
@@ -160,10 +159,11 @@ a {
 .icon-circle:after {
     content: attr(data-info);
     position: absolute;
-    top: -28px;
+    top: -22px;
     left: 0;
     width: 95px;
     color: #fff;
+    font-size: 14px;
     font-weight: bold;
     text-align: left;
     opacity: 0;
@@ -180,7 +180,7 @@ a {
 }
 
 .icon-repeat {
-    margin-left: 20px;
+    margin-left: 5px;
 }
 
 .icon-back-holder {
@@ -405,10 +405,6 @@ a {
 
 /* Mobile Phones Portrait or Landscape */
 @media screen and (max-device-width: 640px) {
-    .main-content {
-        margin: 0;
-    }
-
     .subtitle {
         margin: 0;
     }
