@@ -238,9 +238,8 @@ XMing.GameStateManager = new function() {
         });
 
         $(".icon-back").click(function() {
-            $(".panel-game").hide();
-            $(".panel-leaderboard").hide();
-            $(".panel-main").show();
+            $(".panel-game, .panel-leaderboard").hide();
+            $(".panel-main").fadeIn();
         });
 
         $(".icon-repeat").click(function() {
@@ -256,14 +255,11 @@ XMing.GameStateManager = new function() {
         score = 0;
         roundNumber = 0;
 
-        $(".panel-main").hide();
-        $(".panel-game").show();
+        $(".panel-main, #replay").hide();
+        $(".panel-game, #timer").fadeIn();
         $('html, body').animate({
             scrollTop: $(".panel-container").offset().top
         }, 'fast');
-
-        $("#timer").show();
-        $("#replay").hide();
 
         // set to 0 to force resize
         windowWidth = 0;
@@ -312,7 +308,7 @@ XMing.GameStateManager = new function() {
         });
 
         $("#timer").hide();
-        $("#replay").show();
+        $("#replay").fadeIn();
         $("#score-value").html(score);
 
         var imageNumeral = (selectedNumeralType == "arabic" ? "images/1_2_3.png" : "images/I_II_III.png");
@@ -415,8 +411,7 @@ XMing.GameStateManager = new function() {
     };
     this.showLeaderboard = function() {
         $(".panel-main").hide();
-        $(".panel-leaderboard").show();
-        $(".loader").show();
+        $(".panel-leaderboard, .loader").fadeIn();
 
         $(".highscore-list").html("");
 
