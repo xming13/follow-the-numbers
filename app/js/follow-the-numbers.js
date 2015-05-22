@@ -307,6 +307,11 @@ XMing.GameStateManager = new function() {
             $(".game-grid").append("<li><div class='content animated fadeIn'>" + endNumeral + "</li>");
         });
 
+
+        $("li .animated.fadeIn").one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+            $(this).removeClass("animated fadeIn");
+        });
+
         $("#timer").hide();
         $("#replay").fadeIn();
         $("#score-value").html(score);
@@ -395,9 +400,10 @@ XMing.GameStateManager = new function() {
                     }
                 } else {
                     if (selectedNumber != "") {
-                        $(this.firstChild).addClass("animated shake");
-                        $(this.firstChild).one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-                            $(this.firstChild).removeClass("animated shake");
+                        var $thisFirstChild = $(this.firstChild);
+                        $thisFirstChild.addClass("animated shake");
+                        $thisFirstChild.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                            $thisFirstChild.removeClass("animated shake");
                         });
                     }
                 }
