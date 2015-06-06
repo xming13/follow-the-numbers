@@ -1,0 +1,17 @@
+{
+    "short_name": "follow_the_numbers",
+    "name": "Follow The Numbers",
+    "icons": [
+        {
+            "src": "images/1_2_3.png",
+            "sizes": "150x150"
+        },
+        {
+            "src": "images/follow-the-numbers-og.png",
+            "sizes": "200x200"
+        }
+    ],
+    "start_url": "index.html",
+    "display": "fullscreen",
+    "orientation": "portrait"
+}
